@@ -1,10 +1,20 @@
 """Streamlit view. Keep it thin: load state, call poll.core, render."""
 
+import re
+
 import pandas as pd
 import streamlit as st
 
 from poll import store
-from poll.core import create_poll, tally, total_votes, vote
+from poll.core import create_poll, percentages, standings, tally, total_votes, vote
+
+MARKS = {"leader": "🏆", "draw": "🤝", "loser": "👎", "unvoted": "not voted yet", None: ""}
+
+
+def escape_markdown(text: str) -> str:
+    """Backslash-escape Markdown characters so user text is shown as typed."""
+    return re.sub(r"([\\`*_{}\[\]()#+\-.!|<>~])", r"\\\1", text)
+
 
 st.set_page_config(page_title="Live Poll", page_icon="🗳️")
 st.title("🗳️ Live Poll")
@@ -26,17 +36,23 @@ if poll is None:
             st.rerun()
     st.stop()
 
-st.subheader(poll["question"])
+st.subheader(escape_markdown(poll["question"]))
 
 with st.form("vote"):
-    choice = st.radio("Your vote", poll["options"])
+    choice = st.radio("Your vote", poll["options"], format_func=escape_markdown)
     if st.form_submit_button("Vote"):
         store.save(vote(poll, choice))
         st.rerun()
 
 results = pd.DataFrame(tally(poll), columns=["Option", "Votes"]).set_index("Option")
 st.bar_chart(results)
-st.caption(f"{total_votes(poll)} votes so far")
+
+rows = zip(tally(poll), percentages(poll), standings(poll), strict=True)
+for (option, votes), (_, share), (_, standing) in rows:
+    st.markdown(f"{escape_markdown(option)} — {votes} votes ({share}%) {MARKS[standing]}")
+
+total = total_votes(poll)
+st.caption(f"{total} votes so far" if total else "No votes yet — be the first!")
 
 if st.button("Reset poll"):
     store.clear()

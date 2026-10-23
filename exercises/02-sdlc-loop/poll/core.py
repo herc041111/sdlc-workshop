@@ -43,3 +43,42 @@ def tally(poll: Poll) -> list[tuple[str, int]]:
 
 def total_votes(poll: Poll) -> int:
     return sum(poll["votes"].values())
+
+
+def percentages(poll: Poll) -> list[tuple[str, int]]:
+    """Whole-number share of the vote per option, in creation order, adding up to 100.
+
+    Largest remainder: round every share down, then hand the leftover points one each to
+    the largest remainders, ties going to the option created first. All 0 with no votes.
+    """
+    total = total_votes(poll)
+    counts = tally(poll)
+    if total == 0:
+        return [(option, 0) for option, _ in counts]
+    shares = [votes * 100 // total for _, votes in counts]
+    by_remainder = sorted(range(len(counts)), key=lambda i: -(counts[i][1] * 100 % total))
+    for i in by_remainder[: 100 - sum(shares)]:
+        shares[i] += 1
+    return [(option, share) for (option, _), share in zip(counts, shares, strict=True)]
+
+
+def standings(poll: Poll) -> list[tuple[str, str | None]]:
+    """Each option's place by vote count, in creation order.
+
+    "leader" when one option has the most votes, "draw" for every option tied for the
+    most, "unvoted" for options nobody voted for, "loser" for the rest. All None with no
+    votes.
+    """
+    counts = tally(poll)
+    if total_votes(poll) == 0:
+        return [(option, None) for option, _ in counts]
+    top = max(votes for _, votes in counts)
+    leaders = sum(1 for _, votes in counts if votes == top)
+    first = "leader" if leaders == 1 else "draw"
+
+    def standing(votes: int) -> str:
+        if votes == top:
+            return first
+        return "loser" if votes else "unvoted"
+
+    return [(option, standing(votes)) for option, votes in counts]

@@ -1,6 +1,6 @@
 import pytest
 
-from poll.core import create_poll, tally, total_votes, vote
+from poll.core import create_poll, percentages, standings, tally, total_votes, vote
 
 
 def make_poll():
@@ -71,3 +71,143 @@ def test_total_votes_counts_every_vote():
 
 def test_total_votes_is_zero_for_a_new_poll():
     assert total_votes(make_poll()) == 0
+
+
+def poll_with_votes(counts):
+    """A poll whose options A, B, C... have the given vote counts."""
+    options = [chr(ord("A") + i) for i in range(len(counts))]
+    poll = create_poll("Lunch?", options)
+    return {**poll, "votes": dict(zip(options, counts, strict=True))}
+
+
+def test_percentages_add_up_to_100():
+    assert percentages(poll_with_votes([2, 1])) == [("A", 67), ("B", 33)]
+    assert percentages(poll_with_votes([1, 2])) == [("A", 33), ("B", 67)]
+
+
+def test_percentages_give_leftover_point_to_first_created_on_tie():
+    assert percentages(poll_with_votes([1, 1, 1])) == [("A", 34), ("B", 33), ("C", 33)]
+
+
+def test_percentages_tie_break_follows_creation_order_not_name():
+    # Creation order isn't alphabetical, so a tie-break by name would give Pizza the point.
+    poll = create_poll("Lunch?", ["Sushi", "Pizza", "Salad"])
+    for option in ["Sushi", "Pizza", "Salad"]:
+        poll = vote(poll, option)
+
+    assert percentages(poll) == [("Sushi", 34), ("Pizza", 33), ("Salad", 33)]
+
+def test_percentages_with_a_zero_vote_option():
+    assert percentages(poll_with_votes([1, 1, 1, 0])) == [
+        ("A", 34),
+        ("B", 33),
+        ("C", 33),
+        ("D", 0),
+    ]
+
+
+def test_percentages_always_total_100_when_there_are_votes():
+    for counts in ([1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [5, 3, 2, 1], [0, 7, 0], [2, 2, 2, 1]):
+        assert sum(p for _, p in percentages(poll_with_votes(counts))) == 100
+
+
+def test_percentages_are_zero_with_no_votes():
+    assert percentages(make_poll()) == [("Pizza", 0), ("Sushi", 0), ("Salad", 0)]
+
+
+def test_percentages_keep_creation_order():
+    poll = vote(vote(make_poll(), "Salad"), "Salad")
+
+    assert [option for option, _ in percentages(poll)] == ["Pizza", "Sushi", "Salad"]
+
+
+def test_percentages_leave_the_poll_unchanged():
+    poll = poll_with_votes([1, 1, 1])
+    before = {**poll, "votes": dict(poll["votes"]), "options": list(poll["options"])}
+
+    percentages(poll)
+
+    assert poll == before
+
+
+def test_standings_single_leader_others_lose():
+    assert standings(poll_with_votes([3, 1, 0])) == [
+        ("A", "leader"),
+        ("B", "loser"),
+        ("C", "unvoted"),
+    ]
+
+
+def test_standings_zero_vote_option_is_unvoted_beside_a_draw():
+    assert standings(poll_with_votes([1, 1, 0])) == [
+        ("A", "draw"),
+        ("B", "draw"),
+        ("C", "unvoted"),
+    ]
+
+
+def test_standings_tie_for_first_is_a_draw():
+    assert standings(poll_with_votes([2, 2, 1])) == [
+        ("A", "draw"),
+        ("B", "draw"),
+        ("C", "loser"),
+    ]
+
+
+def test_standings_three_way_tie_for_first_is_a_draw():
+    assert standings(poll_with_votes([1, 3, 3, 3])) == [
+        ("A", "loser"),
+        ("B", "draw"),
+        ("C", "draw"),
+        ("D", "draw"),
+    ]
+
+
+def test_standings_everyone_tied_is_all_draw():
+    # Percentages are 34 / 33 / 33 here, but standings follow vote counts.
+    assert standings(poll_with_votes([1, 1, 1])) == [("A", "draw"), ("B", "draw"), ("C", "draw")]
+
+
+def test_standings_are_none_with_no_votes():
+    assert standings(make_poll()) == [("Pizza", None), ("Sushi", None), ("Salad", None)]
+
+
+def test_standings_leave_the_poll_unchanged():
+    poll = poll_with_votes([2, 2, 1])
+    before = {**poll, "votes": dict(poll["votes"]), "options": list(poll["options"])}
+
+    standings(poll)
+
+    assert poll == before
+
+
+def test_percentages_are_whole_numbers():
+    for counts in ([2, 1], [1, 1, 1], [5, 3, 2, 1], [0, 0]):
+        assert all(type(p) is int for _, p in percentages(poll_with_votes(counts)))
+
+
+def test_percentages_spread_several_leftover_points_by_remainder():
+    # 33.3 / 16.7 ×4: three leftover points go to the largest remainders (B, C, D),
+    # not to A, and E misses out because it was created last.
+    assert percentages(poll_with_votes([2, 1, 1, 1, 1])) == [
+        ("A", 33),
+        ("B", 17),
+        ("C", 17),
+        ("D", 17),
+        ("E", 16),
+    ]
+
+
+def test_standings_marks_every_voted_non_leader_as_loser():
+    assert standings(poll_with_votes([3, 1, 1, 0])) == [
+        ("A", "leader"),
+        ("B", "loser"),
+        ("C", "loser"),
+        ("D", "unvoted"),
+    ]
+
+
+def test_standings_keep_creation_order():
+    poll = vote(vote(make_poll(), "Salad"), "Sushi")
+
+    assert standings(poll) == [("Pizza", "unvoted"), ("Sushi", "draw"), ("Salad", "draw")]
