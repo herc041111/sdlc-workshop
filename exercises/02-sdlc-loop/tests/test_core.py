@@ -1,6 +1,6 @@
 import pytest
 
-from poll.core import create_poll, tally, total_votes, vote
+from poll.core import create_poll, percentages, tally, total_votes, vote
 
 
 def make_poll():
@@ -71,3 +71,52 @@ def test_total_votes_counts_every_vote():
 
 def test_total_votes_is_zero_for_a_new_poll():
     assert total_votes(make_poll()) == 0
+
+
+def poll_with_votes(counts):
+    """A poll whose options A, B, C... have the given vote counts."""
+    options = [chr(ord("A") + i) for i in range(len(counts))]
+    poll = create_poll("Lunch?", options)
+    return {**poll, "votes": dict(zip(options, counts, strict=True))}
+
+
+def test_percentages_add_up_to_100():
+    assert percentages(poll_with_votes([2, 1])) == [("A", 67), ("B", 33)]
+    assert percentages(poll_with_votes([1, 2])) == [("A", 33), ("B", 67)]
+
+
+def test_percentages_give_leftover_point_to_first_created_on_tie():
+    assert percentages(poll_with_votes([1, 1, 1])) == [("A", 34), ("B", 33), ("C", 33)]
+
+
+def test_percentages_with_a_zero_vote_option():
+    assert percentages(poll_with_votes([1, 1, 1, 0])) == [
+        ("A", 34),
+        ("B", 33),
+        ("C", 33),
+        ("D", 0),
+    ]
+
+
+def test_percentages_always_total_100_when_there_are_votes():
+    for counts in ([1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [5, 3, 2, 1], [0, 7, 0], [2, 2, 2, 1]):
+        assert sum(p for _, p in percentages(poll_with_votes(counts))) == 100
+
+
+def test_percentages_are_zero_with_no_votes():
+    assert percentages(make_poll()) == [("Pizza", 0), ("Sushi", 0), ("Salad", 0)]
+
+
+def test_percentages_keep_creation_order():
+    poll = vote(vote(make_poll(), "Salad"), "Salad")
+
+    assert [option for option, _ in percentages(poll)] == ["Pizza", "Sushi", "Salad"]
+
+
+def test_percentages_leave_the_poll_unchanged():
+    poll = poll_with_votes([1, 1, 1])
+    before = {**poll, "votes": dict(poll["votes"]), "options": list(poll["options"])}
+
+    percentages(poll)
+
+    assert poll == before
