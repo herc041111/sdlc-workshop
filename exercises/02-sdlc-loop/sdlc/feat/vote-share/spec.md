@@ -5,6 +5,9 @@ Status: Approved (2026-10-23)
 Amended 2026-10-23 at the user's request, during task 3: once there are votes, an option
 with 0 votes shows "not voted yet" instead of 👎 (criteria 5, 6, 10 and 12).
 
+Amended 2026-10-23 at the user's request, after review finding #2: text typed by users is
+shown literally everywhere it appears, not only in the results list (criterion 13).
+
 ## Objective
 
 People watching a live poll should see at a glance each option's share of the vote and who
@@ -21,6 +24,8 @@ In scope:
   e.g. `Pizza — 5 votes (42%) 🏆`.
 - With zero votes, the caption "No votes yet — be the first!" replaces "0 votes so far".
 - A wiring check in `tests/test_app.py` that the results list is shown.
+- Showing user-typed text literally (Markdown escaped) in the poll question, the vote
+  options and the results list.
 
 Out of scope:
 - Decimal places in percentages.
@@ -56,6 +61,10 @@ Out of scope:
 12. Given the poll has votes and an option has 0 votes, then that option shows 0% and
     "not voted yet", never 👎: 1 / 1 / 0 → 🤝 / 🤝 / not voted yet, and
     3 / 1 / 0 → 🏆 / 👎 / not voted yet.
+13. Given a question or option typed with Markdown in it (e.g. `# Lunch?`, `*Pizza*`,
+    `![x](http://…)`), then the question heading, the vote options and the results list show
+    it as typed, never as a heading, emphasis, link or image, and voting for such an option
+    still counts it under its original name.
 
 ## Edge cases and decisions
 
@@ -74,6 +83,7 @@ Out of scope:
 | Option with zero votes while others have votes | 0% and "not voted yet" (plain text, no icon), whether the lead is a 🏆 or a 🤝 | Amended: user found 1 / 1 / 0 showing 👎 on an option nobody voted for; 0 votes means not voted yet, not losing. |
 | Order | Creation order | Rows don't jump around while the room watches votes come in. |
 | Display | Text list under the existing bar chart | User kept the chart and added a line per option. |
+| Markdown in user text | Escaped in `st.subheader`, `st.radio` labels (via `format_func`, so the stored vote keeps the raw name) and the results list | Review finding #2; `st.subheader` renders full Markdown and `st.radio` labels render links and images. User asked to fix it on this branch. |
 | Invalid input | None new: polls already have at least two unique options and votes only for known options (`create_poll`, `vote`) | Existing validation covers it. |
 
 ## Open questions

@@ -75,6 +75,18 @@ first (test-first in `tests/test_core.py`), then the view displays it.
 - Files: `poll/core.py`, `tests/test_core.py`, `app.py`, `tests/test_app.py`. Size: S/M.
   Depends on tasks 1 and 2.
 
+### Task 4: Show the question and vote options literally
+
+Added after review finding #2 and the second spec amendment. `st.subheader` renders full
+Markdown and `st.radio` option labels render links and images, so user text goes through
+`escape_markdown()` there too (`format_func` for the radio, so votes keep the raw name).
+
+- Acceptance criteria: spec #13.
+- Test that proves it (`tests/test_app.py`, wiring): a poll with question `# Lunch?` and
+  options `*Pizza*` / `![x](http://example.test/p.png)` shows the escaped question and
+  escaped radio labels, and a vote for `*Pizza*` is stored under `*Pizza*`.
+- Files: `app.py`, `tests/test_app.py`. Size: XS.
+
 ### Checkpoint: after task 3
 
 - Full suite and ruff clean; run the app (`uv run python -m streamlit run app.py`) and check
