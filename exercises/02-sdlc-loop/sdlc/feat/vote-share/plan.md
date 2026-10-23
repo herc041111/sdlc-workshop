@@ -11,13 +11,14 @@ Two new pure functions in `poll/core.py`, next to `tally()` and `total_votes()`.
   Floor each `votes * 100 // total`, then give the leftover points, one each, to the options
   with the largest remainder (`votes * 100 % total`), ties going to the option created
   first. Integer arithmetic only, so there are no float rounding surprises. Zero votes → all 0.
-- `standings(poll) -> list[tuple[str, str | None]]`: `"leader"`, `"draw"`, `"loser"` or
-  `None`, decided from vote counts, never from rounded percentages. Zero votes → all `None`.
+- `standings(poll) -> list[tuple[str, str | None]]`: `"leader"`, `"draw"`, `"loser"`,
+  `"unvoted"` (0 votes while others have votes) or `None`, decided from vote counts, never
+  from rounded percentages. Zero votes → all `None`.
 
 Two functions rather than one `results()`: rounding and ranking are independent rules, each
 gets its own tests, and ranking can't accidentally read rounded shares. The status is a
 plain string, not an emoji: `poll/core.py` stays free of presentation, and `app.py` maps
-`leader → 🏆`, `draw → 🤝`, `loser → 👎`.
+`leader → 🏆`, `draw → 🤝`, `loser → 👎`, `unvoted → not voted yet`.
 
 `app.py` stays thin: under the bar chart it zips `tally()`, `percentages()` and
 `standings()` into one line per option, `<option> — <n> votes (<p>%) <mark>`, and swaps the
@@ -51,20 +52,33 @@ Checks before every commit: `uv run python -m pytest -q` and `uv run python -m r
   - `test_standings_leave_the_poll_unchanged`
 - Files: `poll/core.py`, `tests/test_core.py`. Size: S.
 
-### Task 3: Show the results list and the empty-poll caption
+### Task 3: Show the results list, "not voted yet" and the empty-poll caption
 
-- Acceptance criteria: spec #10, #11.
-- Test that proves it (in `tests/test_app.py`, wiring only):
-  - after one vote for Sushi in a Pizza/Sushi poll, the page shows `Sushi — 1 votes (100%) 🏆`
-    and `Pizza — 0 votes (0%) 👎`
-  - a new poll shows the caption "No votes yet — be the first!"
-  - the existing `test_create_a_poll_then_vote` still passes ("1 votes so far")
-- Files: `app.py`, `tests/test_app.py`. Size: S. Depends on tasks 1 and 2.
+Extended after the spec amendment: an option with 0 votes in a poll that has votes is
+"not voted yet", not a loser. That rule is business logic, so it lands in `standings()`
+first (test-first in `tests/test_core.py`), then the view displays it.
+
+- Acceptance criteria: spec #5, #6, #10, #11, #12.
+- Test that proves it:
+  - core (`tests/test_core.py`, written first):
+    - `test_standings_zero_vote_option_is_unvoted_beside_a_draw` (1 / 1 / 0 → draw / draw /
+      unvoted)
+    - `test_standings_single_leader_others_lose` updated: 3 / 1 / 0 → leader / loser /
+      unvoted
+    - 2 / 2 / 1 still gives draw / draw / loser (unchanged)
+  - wiring (`tests/test_app.py`):
+    - in a Pizza/Sushi/Salad poll after votes Pizza, Pizza, Sushi, the page shows
+      `Pizza — 2 votes (67%) 🏆`, `Sushi — 1 votes (33%) 👎` and
+      `Salad — 0 votes (0%) not voted yet`
+    - a new poll shows the caption "No votes yet — be the first!"
+    - the existing `test_create_a_poll_then_vote` still passes ("1 votes so far")
+- Files: `poll/core.py`, `tests/test_core.py`, `app.py`, `tests/test_app.py`. Size: S/M.
+  Depends on tasks 1 and 2.
 
 ### Checkpoint: after task 3
 
 - Full suite and ruff clean; run the app (`uv run python -m streamlit run app.py`) and check
-  by eye: zero votes, a clear leader, a draw.
+  by eye: zero votes, a clear leader, a draw, and a 1 / 1 / 0 draw with "not voted yet".
 
 ## Risks
 
