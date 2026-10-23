@@ -110,7 +110,7 @@ Markdown and `st.radio` option labels render links and images, so user text goes
 - [x] /sdlc:build: 3 tasks, one commit each; task 3 extended by the 2026-10-23 spec amendment
 - [x] /sdlc:test: 12 criteria + 14 edge-case rows mapped by test-engineer; 1 gap + 6 weak closed with 7 tests; "below the chart" layout check skipped (layout, low value)
 - [x] /sdlc:review: 7 findings (1 Important, 6 Suggestions): 2 fixed, 4 won't fix, 1 deferred to /sdlc:code-simplify
-- [ ] /sdlc:code-simplify
+- [x] /sdlc:code-simplify: 1 simplification (redundant `.rstrip()` removed); review #5 and #6 not done, because both need test edits, which a no-behavior-change refactor mustn't
 
 ## Test evidence
 
@@ -130,3 +130,5 @@ Markdown and `st.radio` option labels render links and images, so user text goes
 - 2026-10-23 19:37 · review #2 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 42 passed, All checks passed!
 - 2026-10-23 19:40 · task 4 RED · `uv run python -m pytest -q tests/test_app.py::test_question_and_vote_options_are_shown_literally` → 1 failed: subheader showed `# Lunch?` unescaped (expected)
 - 2026-10-23 19:40 · task 4 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 43 passed, All checks passed!
+- 2026-10-23 19:42 · /sdlc:code-simplify start · `uv run python -m pytest -q && uv run python -m ruff check .` → 43 passed, All checks passed!
+- 2026-10-23 19:43 · /sdlc:code-simplify final (after removing `.rstrip()` in `app.py`, no test edited) · `uv run python -m pytest -q && uv run python -m ruff check .` → 43 passed, All checks passed!

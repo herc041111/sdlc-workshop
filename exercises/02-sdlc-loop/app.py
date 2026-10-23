@@ -49,7 +49,7 @@ st.bar_chart(results)
 
 rows = zip(tally(poll), percentages(poll), standings(poll), strict=True)
 for (option, votes), (_, share), (_, standing) in rows:
-    st.markdown(f"{escape_markdown(option)} — {votes} votes ({share}%) {MARKS[standing]}".rstrip())
+    st.markdown(f"{escape_markdown(option)} — {votes} votes ({share}%) {MARKS[standing]}")
 
 total = total_votes(poll)
 st.caption(f"{total} votes so far" if total else "No votes yet — be the first!")
