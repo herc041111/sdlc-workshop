@@ -81,7 +81,7 @@ Checks before every commit: `uv run python -m pytest -q` and `uv run python -m r
 
 - [x] /sdlc:spec: approved 2026-10-23 after 9 questions
 - [x] /sdlc:plan: 3 tasks
-- [x] /sdlc:build: task 1 done (in progress)
+- [x] /sdlc:build: tasks 1–2 done (in progress)
 - [ ] /sdlc:test
 - [ ] /sdlc:review
 - [ ] /sdlc:code-simplify
@@ -91,3 +91,5 @@ Checks before every commit: `uv run python -m pytest -q` and `uv run python -m r
 - 2026-10-23 17:10 · task 1 RED · `uv run python -m pytest tests/test_core.py -q` → collection error: cannot import name 'percentages' from 'poll.core' (expected)
 - 2026-10-23 17:12 · task 1 GREEN · `uv run python -m pytest -q` → 24 passed; `uv run python -m ruff check .` → 2 × B905 (zip without strict=)
 - 2026-10-23 17:13 · task 1 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 24 passed, All checks passed!
+- 2026-10-23 17:18 · task 2 RED · `uv run python -m pytest tests/test_core.py -q` → collection error: cannot import name 'standings' from 'poll.core' (expected)
+- 2026-10-23 17:18 · task 2 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 30 passed, All checks passed!

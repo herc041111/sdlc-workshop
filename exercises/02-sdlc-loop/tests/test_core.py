@@ -1,6 +1,6 @@
 import pytest
 
-from poll.core import create_poll, percentages, tally, total_votes, vote
+from poll.core import create_poll, percentages, standings, tally, total_votes, vote
 
 
 def make_poll():
@@ -118,5 +118,48 @@ def test_percentages_leave_the_poll_unchanged():
     before = {**poll, "votes": dict(poll["votes"]), "options": list(poll["options"])}
 
     percentages(poll)
+
+    assert poll == before
+
+
+def test_standings_single_leader_others_lose():
+    assert standings(poll_with_votes([3, 1, 0])) == [
+        ("A", "leader"),
+        ("B", "loser"),
+        ("C", "loser"),
+    ]
+
+
+def test_standings_tie_for_first_is_a_draw():
+    assert standings(poll_with_votes([2, 2, 1])) == [
+        ("A", "draw"),
+        ("B", "draw"),
+        ("C", "loser"),
+    ]
+
+
+def test_standings_three_way_tie_for_first_is_a_draw():
+    assert standings(poll_with_votes([1, 3, 3, 3])) == [
+        ("A", "loser"),
+        ("B", "draw"),
+        ("C", "draw"),
+        ("D", "draw"),
+    ]
+
+
+def test_standings_everyone_tied_is_all_draw():
+    # Percentages are 34 / 33 / 33 here, but standings follow vote counts.
+    assert standings(poll_with_votes([1, 1, 1])) == [("A", "draw"), ("B", "draw"), ("C", "draw")]
+
+
+def test_standings_are_none_with_no_votes():
+    assert standings(make_poll()) == [("Pizza", None), ("Sushi", None), ("Salad", None)]
+
+
+def test_standings_leave_the_poll_unchanged():
+    poll = poll_with_votes([2, 2, 1])
+    before = {**poll, "votes": dict(poll["votes"]), "options": list(poll["options"])}
+
+    standings(poll)
 
     assert poll == before

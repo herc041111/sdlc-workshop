@@ -60,3 +60,18 @@ def percentages(poll: Poll) -> list[tuple[str, int]]:
     for i in by_remainder[: 100 - sum(shares)]:
         shares[i] += 1
     return [(option, share) for (option, _), share in zip(counts, shares, strict=True)]
+
+
+def standings(poll: Poll) -> list[tuple[str, str | None]]:
+    """Each option's place by vote count, in creation order.
+
+    "leader" when one option has the most votes, "draw" for every option tied for the
+    most, "loser" for the rest. All None with no votes.
+    """
+    counts = tally(poll)
+    if total_votes(poll) == 0:
+        return [(option, None) for option, _ in counts]
+    top = max(votes for _, votes in counts)
+    leaders = sum(1 for _, votes in counts if votes == top)
+    first = "leader" if leaders == 1 else "draw"
+    return [(option, first if votes == top else "loser") for option, votes in counts]
