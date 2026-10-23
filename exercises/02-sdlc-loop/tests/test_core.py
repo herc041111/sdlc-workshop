@@ -89,6 +89,14 @@ def test_percentages_give_leftover_point_to_first_created_on_tie():
     assert percentages(poll_with_votes([1, 1, 1])) == [("A", 34), ("B", 33), ("C", 33)]
 
 
+def test_percentages_tie_break_follows_creation_order_not_name():
+    # Creation order isn't alphabetical, so a tie-break by name would give Pizza the point.
+    poll = create_poll("Lunch?", ["Sushi", "Pizza", "Salad"])
+    for option in ["Sushi", "Pizza", "Salad"]:
+        poll = vote(poll, option)
+
+    assert percentages(poll) == [("Sushi", 34), ("Pizza", 33), ("Salad", 33)]
+
 def test_percentages_with_a_zero_vote_option():
     assert percentages(poll_with_votes([1, 1, 1, 0])) == [
         ("A", 34),
