@@ -97,7 +97,7 @@ first (test-first in `tests/test_core.py`), then the view displays it.
 - [x] /sdlc:plan: 3 tasks
 - [x] /sdlc:build: 3 tasks, one commit each; task 3 extended by the 2026-10-23 spec amendment
 - [x] /sdlc:test: 12 criteria + 14 edge-case rows mapped by test-engineer; 1 gap + 6 weak closed with 7 tests; "below the chart" layout check skipped (layout, low value)
-- [ ] /sdlc:review
+- [x] /sdlc:review: 7 findings (1 Important, 6 Suggestions): 2 fixed, 4 won't fix, 1 deferred to /sdlc:code-simplify
 - [ ] /sdlc:code-simplify
 
 ## Test evidence
