@@ -95,7 +95,7 @@ first (test-first in `tests/test_core.py`), then the view displays it.
 
 - [x] /sdlc:spec: approved 2026-10-23 after 9 questions
 - [x] /sdlc:plan: 3 tasks
-- [x] /sdlc:build: tasks 1–2 done (in progress)
+- [x] /sdlc:build: 3 tasks, one commit each; task 3 extended by the 2026-10-23 spec amendment
 - [ ] /sdlc:test
 - [ ] /sdlc:review
 - [ ] /sdlc:code-simplify
@@ -107,3 +107,6 @@ first (test-first in `tests/test_core.py`), then the view displays it.
 - 2026-10-23 17:13 · task 1 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 24 passed, All checks passed!
 - 2026-10-23 17:18 · task 2 RED · `uv run python -m pytest tests/test_core.py -q` → collection error: cannot import name 'standings' from 'poll.core' (expected)
 - 2026-10-23 17:18 · task 2 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 30 passed, All checks passed!
+- 2026-10-23 19:19 · task 3 RED · `uv run python -m pytest -q` → 4 failed, 29 passed: 2 core standings tests got 'loser' instead of 'unvoted'; 2 app tests found no results list or new caption (expected)
+- 2026-10-23 19:20 · task 3 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 33 passed, All checks passed!
+- 2026-10-23 19:20 · task 3 checkpoint · real `app.py` driven through `AppTest` (scratchpad script): Pizza/Apple/Orange 1/1/0 → `50% 🤝`, `50% 🤝`, `0% not voted yet`; 2/2/1 → `40% 🤝`, `40% 🤝`, `20% 👎`; empty poll caption "No votes yet — be the first!". Browser check by eye not done.

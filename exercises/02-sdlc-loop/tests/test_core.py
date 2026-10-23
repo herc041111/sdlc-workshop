@@ -126,7 +126,15 @@ def test_standings_single_leader_others_lose():
     assert standings(poll_with_votes([3, 1, 0])) == [
         ("A", "leader"),
         ("B", "loser"),
-        ("C", "loser"),
+        ("C", "unvoted"),
+    ]
+
+
+def test_standings_zero_vote_option_is_unvoted_beside_a_draw():
+    assert standings(poll_with_votes([1, 1, 0])) == [
+        ("A", "draw"),
+        ("B", "draw"),
+        ("C", "unvoted"),
     ]
 
 

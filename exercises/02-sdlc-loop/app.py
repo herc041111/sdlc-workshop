@@ -4,7 +4,9 @@ import pandas as pd
 import streamlit as st
 
 from poll import store
-from poll.core import create_poll, tally, total_votes, vote
+from poll.core import create_poll, percentages, standings, tally, total_votes, vote
+
+MARKS = {"leader": "🏆", "draw": "🤝", "loser": "👎", "unvoted": "not voted yet", None: ""}
 
 st.set_page_config(page_title="Live Poll", page_icon="🗳️")
 st.title("🗳️ Live Poll")
@@ -36,7 +38,13 @@ with st.form("vote"):
 
 results = pd.DataFrame(tally(poll), columns=["Option", "Votes"]).set_index("Option")
 st.bar_chart(results)
-st.caption(f"{total_votes(poll)} votes so far")
+
+rows = zip(tally(poll), percentages(poll), standings(poll), strict=True)
+for (option, votes), (_, share), (_, standing) in rows:
+    st.markdown(f"{option} — {votes} votes ({share}%) {MARKS[standing]}".rstrip())
+
+total = total_votes(poll)
+st.caption(f"{total} votes so far" if total else "No votes yet — be the first!")
 
 if st.button("Reset poll"):
     store.clear()

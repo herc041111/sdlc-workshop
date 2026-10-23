@@ -66,7 +66,8 @@ def standings(poll: Poll) -> list[tuple[str, str | None]]:
     """Each option's place by vote count, in creation order.
 
     "leader" when one option has the most votes, "draw" for every option tied for the
-    most, "loser" for the rest. All None with no votes.
+    most, "unvoted" for options nobody voted for, "loser" for the rest. All None with no
+    votes.
     """
     counts = tally(poll)
     if total_votes(poll) == 0:
@@ -74,4 +75,10 @@ def standings(poll: Poll) -> list[tuple[str, str | None]]:
     top = max(votes for _, votes in counts)
     leaders = sum(1 for _, votes in counts if votes == top)
     first = "leader" if leaders == 1 else "draw"
-    return [(option, first if votes == top else "loser") for option, votes in counts]
+
+    def standing(votes: int) -> str:
+        if votes == top:
+            return first
+        return "loser" if votes else "unvoted"
+
+    return [(option, standing(votes)) for option, votes in counts]
