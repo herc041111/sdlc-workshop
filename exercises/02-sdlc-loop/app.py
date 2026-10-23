@@ -36,10 +36,10 @@ if poll is None:
             st.rerun()
     st.stop()
 
-st.subheader(poll["question"])
+st.subheader(escape_markdown(poll["question"]))
 
 with st.form("vote"):
-    choice = st.radio("Your vote", poll["options"])
+    choice = st.radio("Your vote", poll["options"], format_func=escape_markdown)
     if st.form_submit_button("Vote"):
         store.save(vote(poll, choice))
         st.rerun()

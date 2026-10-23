@@ -28,8 +28,8 @@ Proposed only, not applied. Both break a pattern likely to come back.
    > Text typed by users (poll questions, option names) is never rendered as raw Markdown.
    > Escape it, or use a widget that shows plain text.
 
-   The same exposure already exists outside this branch: the question goes through
-   `st.subheader`. That's out of scope here, and a candidate follow-up.
+   The same exposure existed in the question (`st.subheader`) and the vote options
+   (`st.radio`). The user brought both onto this branch: spec criterion 13, task 4.
 2. **From #1, for `CLAUDE.md` › Conventions (tests):**
    > A test that checks order or tie-breaking uses names whose creation order isn't
    > alphabetical, so sorting by name can't pass by accident.

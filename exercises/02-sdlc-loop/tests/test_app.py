@@ -106,3 +106,18 @@ def test_option_names_are_shown_literally_not_as_markdown():
         r"\# Sushi — 0 votes (0%) not voted yet",
         r"\!\[x\]\(http://example\.test/p\.png\) — 0 votes (0%) not voted yet",
     ]
+
+
+def test_question_and_vote_options_are_shown_literally():
+    app = run_app()
+    app.text_input[0].input("# Lunch?")
+    app.text_area[0].input("*Pizza*\n![x](http://example.test/p.png)")
+    app.button[0].click().run()
+
+    assert app.subheader[0].value == r"\# Lunch?"
+    assert app.radio[0].options == [r"\*Pizza\*", r"\!\[x\]\(http://example\.test/p\.png\)"]
+
+    app.radio[0].set_value("*Pizza*")
+    app.button[0].click().run()
+
+    assert store.load()["votes"]["*Pizza*"] == 1
