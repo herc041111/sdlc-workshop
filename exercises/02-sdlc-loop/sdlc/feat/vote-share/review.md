@@ -22,7 +22,7 @@ Performance: no findings.
 
 ## Red Queen: rules that would have prevented these
 
-Proposed only, not applied. Both break a pattern likely to come back.
+Both added to `CLAUDE.md` › Conventions on 2026-10-23, with the user's approval.
 
 1. **From #2, for `CLAUDE.md` › Conventions:**
    > Text typed by users (poll questions, option names) is never rendered as raw Markdown.

@@ -12,6 +12,10 @@ A tiny Streamlit app used to practice the agentic SDLC
 - Every behavior in `poll/core.py` has a test in `tests/test_core.py`, written first.
 - `tests/test_app.py` is a smoke test that the UI is wired to the core. Extend it only for
   wiring, not for logic.
+- Text typed by users (poll questions, option names) is never rendered as raw Markdown.
+  Escape it, or use a widget that shows plain text.
+- A test that checks order or tie-breaking uses names whose creation order isn't
+  alphabetical, so sorting by name can't pass by accident.
 
 ## Checks
 
