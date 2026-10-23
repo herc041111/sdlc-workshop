@@ -132,3 +132,4 @@ Markdown and `st.radio` option labels render links and images, so user text goes
 - 2026-10-23 19:40 · task 4 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 43 passed, All checks passed!
 - 2026-10-23 19:42 · /sdlc:code-simplify start · `uv run python -m pytest -q && uv run python -m ruff check .` → 43 passed, All checks passed!
 - 2026-10-23 19:43 · /sdlc:code-simplify final (after removing `.rstrip()` in `app.py`, no test edited) · `uv run python -m pytest -q && uv run python -m ruff check .` → 43 passed, All checks passed!
+- 2026-10-23 19:45 · /sdlc:pr G4 · `uv run python -m pytest -q && uv run python -m ruff check .` → 43 passed, All checks passed!
