@@ -109,7 +109,7 @@ Markdown and `st.radio` option labels render links and images, so user text goes
 - [x] /sdlc:plan: 3 tasks
 - [x] /sdlc:build: 3 tasks, one commit each; task 3 extended by the 2026-10-23 spec amendment
 - [x] /sdlc:test: 12 criteria + 14 edge-case rows mapped by test-engineer; 1 gap + 6 weak closed with 7 tests; "below the chart" layout check skipped (layout, low value)
-- [x] /sdlc:review: 7 findings (1 Important, 6 Suggestions): 2 fixed, 4 won't fix, 1 deferred to /sdlc:code-simplify
+- [x] /sdlc:review: 7 findings (1 Important, 6 Suggestions): 3 fixed (#7 in /sdlc:code-simplify), 4 won't fix
 - [x] /sdlc:code-simplify: 1 simplification (redundant `.rstrip()` removed); review #5 and #6 not done, because both need test edits, which a no-behavior-change refactor mustn't
 
 ## Test evidence
