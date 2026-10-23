@@ -171,3 +171,35 @@ def test_standings_leave_the_poll_unchanged():
     standings(poll)
 
     assert poll == before
+
+
+def test_percentages_are_whole_numbers():
+    for counts in ([2, 1], [1, 1, 1], [5, 3, 2, 1], [0, 0]):
+        assert all(type(p) is int for _, p in percentages(poll_with_votes(counts)))
+
+
+def test_percentages_spread_several_leftover_points_by_remainder():
+    # 33.3 / 16.7 ×4: three leftover points go to the largest remainders (B, C, D),
+    # not to A, and E misses out because it was created last.
+    assert percentages(poll_with_votes([2, 1, 1, 1, 1])) == [
+        ("A", 33),
+        ("B", 17),
+        ("C", 17),
+        ("D", 17),
+        ("E", 16),
+    ]
+
+
+def test_standings_marks_every_voted_non_leader_as_loser():
+    assert standings(poll_with_votes([3, 1, 1, 0])) == [
+        ("A", "leader"),
+        ("B", "loser"),
+        ("C", "loser"),
+        ("D", "unvoted"),
+    ]
+
+
+def test_standings_keep_creation_order():
+    poll = vote(vote(make_poll(), "Salad"), "Sushi")
+
+    assert standings(poll) == [("Pizza", "unvoted"), ("Sushi", "draw"), ("Salad", "draw")]

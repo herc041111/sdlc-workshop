@@ -67,3 +67,32 @@ def test_invalid_poll_shows_an_error():
 
     assert "two options" in app.error[0].value
     assert store.load() is None
+
+
+def create_and_vote(options, votes):
+    app = run_app()
+    app.text_input[0].input("Lunch?")
+    app.text_area[0].input("\n".join(options))
+    app.button[0].click().run()
+    for choice in votes:
+        app.radio[0].set_value(choice)
+        app.button[0].click().run()
+    return [md.value for md in app.markdown]
+
+
+def test_results_list_shows_draw_mark():
+    lines = create_and_vote(["Pizza", "Sushi"], ["Pizza", "Sushi"])
+
+    assert lines == ["Pizza — 1 votes (50%) 🤝", "Sushi — 1 votes (50%) 🤝"]
+
+
+def test_new_poll_lists_options_without_marks():
+    lines = create_and_vote(["Pizza", "Sushi"], [])
+
+    assert lines == ["Pizza — 0 votes (0%)", "Sushi — 0 votes (0%)"]
+
+
+def test_results_list_follows_creation_order():
+    lines = create_and_vote(["Pizza", "Sushi", "Salad"], ["Salad"])
+
+    assert [line.split(" — ")[0] for line in lines] == ["Pizza", "Sushi", "Salad"]

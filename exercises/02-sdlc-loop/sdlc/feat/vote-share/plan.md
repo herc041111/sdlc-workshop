@@ -96,7 +96,7 @@ first (test-first in `tests/test_core.py`), then the view displays it.
 - [x] /sdlc:spec: approved 2026-10-23 after 9 questions
 - [x] /sdlc:plan: 3 tasks
 - [x] /sdlc:build: 3 tasks, one commit each; task 3 extended by the 2026-10-23 spec amendment
-- [ ] /sdlc:test
+- [x] /sdlc:test: 12 criteria + 14 edge-case rows mapped by test-engineer; 1 gap + 6 weak closed with 7 tests; "below the chart" layout check skipped (layout, low value)
 - [ ] /sdlc:review
 - [ ] /sdlc:code-simplify
 
@@ -110,3 +110,5 @@ first (test-first in `tests/test_core.py`), then the view displays it.
 - 2026-10-23 19:19 · task 3 RED · `uv run python -m pytest -q` → 4 failed, 29 passed: 2 core standings tests got 'loser' instead of 'unvoted'; 2 app tests found no results list or new caption (expected)
 - 2026-10-23 19:20 · task 3 GREEN · `uv run python -m pytest -q && uv run python -m ruff check .` → 33 passed, All checks passed!
 - 2026-10-23 19:20 · task 3 checkpoint · real `app.py` driven through `AppTest` (scratchpad script): Pizza/Apple/Orange 1/1/0 → `50% 🤝`, `50% 🤝`, `0% not voted yet`; 2/2/1 → `40% 🤝`, `40% 🤝`, `20% 👎`; empty poll caption "No votes yet — be the first!". Browser check by eye not done.
+- 2026-10-23 19:25 · /sdlc:test gap pass · `uv run python -m pytest -q && uv run python -m ruff check .` → 40 passed, All checks passed! (7 new tests, all green on first run: behavior already built)
+- 2026-10-23 19:27 · /sdlc:test mutation check (code broken on purpose, then restored with `git checkout`): draw-mark typo → `test_results_list_shows_draw_mark` failed; float shares → `test_percentages_are_whole_numbers` failed; leftovers by creation order → `test_percentages_spread_several_leftover_points_by_remainder` failed; 0-vote as loser → both new standings tests failed. Removing `.rstrip()` in `app.py` → `test_new_poll_lists_options_without_marks` still passed: Streamlit already trims trailing whitespace, so `.rstrip()` is redundant (candidate for /sdlc:code-simplify).
