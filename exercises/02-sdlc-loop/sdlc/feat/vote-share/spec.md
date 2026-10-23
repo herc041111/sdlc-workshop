@@ -1,0 +1,79 @@
+# Spec: Vote share percentages and leader marks
+
+Status: Approved (2026-10-23)
+
+## Objective
+
+People watching a live poll should see at a glance each option's share of the vote and who
+is winning. Under the existing bar chart, each option gets one line with its votes, a
+whole-number percentage, and a mark: 🏆 for a clear leader, 🤝 for options tied for first,
+and 👎 for every other option.
+
+## Scope
+
+In scope:
+- Pure functions in `poll/core.py` that compute each option's percentage and its standing
+  (leader, draw or loser), with tests in `tests/test_core.py` written first.
+- A results list in `app.py`, under the bar chart, one line per option in creation order,
+  e.g. `Pizza — 5 votes (42%) 🏆`.
+- With zero votes, the caption "No votes yet — be the first!" replaces "0 votes so far".
+- A wiring check in `tests/test_app.py` that the results list is shown.
+
+Out of scope:
+- Decimal places in percentages.
+- Sorting results by votes. The order stays the order options were created in.
+- Any change to the bar chart.
+- Auto-refresh of results.
+- Any change to voting, poll creation, reset or `poll/store.py`.
+
+## Success criteria
+
+1. Given a poll with at least one vote, when percentages are computed, then each is a whole
+   number and together they add up to exactly 100.
+2. Given votes 1 / 1 / 1, when percentages are computed, then they are 34 / 33 / 33: shares
+   are rounded down, leftover points go to the largest fractional parts, and when fractional
+   parts tie, the option created first gets the point.
+3. Given other uneven splits, percentages follow the same rule and still add up to 100:
+   2 / 1 → 67 / 33, 1 / 2 → 33 / 67, and 1 / 1 / 1 / 0 → 34 / 33 / 33 / 0.
+4. Given a poll with zero votes, then every option's percentage is 0 and no option has a
+   mark.
+5. Given one option has strictly more votes than every other, then that option is marked
+   🏆 and every other option is marked 👎.
+6. Given two or more options share the highest vote count (e.g. 2 / 2 / 1), then each of
+   them is marked 🤝, none is marked 🏆, and the rest are marked 👎.
+7. Given every option has the same non-zero count, then every option is marked 🤝 and none
+   is marked 👎.
+8. Results are returned in the order the options were created, whatever the vote counts.
+9. The core functions don't change the poll they are given.
+10. In the app, below the bar chart, each option is listed as
+    `<option> — <n> votes (<p>%) <mark>`, with no mark when there are no votes.
+11. In the app, with zero votes the caption reads "No votes yet — be the first!"; with
+    votes it still reads "<n> votes so far".
+
+## Edge cases and decisions
+
+| Case | Decision | Why |
+|---|---|---|
+| Rounding | Whole-number percentages | User wants readable shares, no decimals. |
+| Total of the shown shares | Always exactly 100 when there are votes, no exceptions | User chose "100%, without exceptions". |
+| Rounding method | Largest remainder: round every share down, give the leftover points one at a time to the largest fractional parts | Smallest change from the true shares that still adds to 100. |
+| Tied fractional parts | The option created first gets the extra point (1 / 1 / 1 → 34 / 33 / 33) | Deterministic and easy to test; user confirmed. |
+| Zero votes | Every option shows 0%, no marks; caption "No votes yet — be the first!" replaces "0 votes so far" | User asked for 0% plus a hint that voting hasn't started. |
+| Single clear leader | 🏆 on the leader | Original request. |
+| Tie for first (any number of options) | 🤝 on every tied leader, no 🏆 | User: a draw is not a leader. Applies to 2-way, 3-way and larger ties. |
+| Options not in first place | 👎 on each, whenever there are votes | User chose a loser mark for every non-leader. |
+| Everyone tied | All 🤝, no 👎 | Nobody is behind. |
+| Marks follow vote counts, not percentages | 1 / 1 / 1 shows 34 / 33 / 33 but all are 🤝 | The extra rounding point must not create a fake leader. |
+| Option with zero votes while others have votes | 0% and 👎 | Same rule as any non-leader. |
+| Order | Creation order | Rows don't jump around while the room watches votes come in. |
+| Display | Text list under the existing bar chart | User kept the chart and added a line per option. |
+| Invalid input | None new: polls already have at least two unique options and votes only for known options (`create_poll`, `vote`) | Existing validation covers it. |
+
+## Open questions
+
+- None.
+
+## Decisions
+
+- No ADR. Largest-remainder rounding was a user choice with no lasting architectural impact,
+  and it is recorded above.
