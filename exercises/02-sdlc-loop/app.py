@@ -1,5 +1,7 @@
 """Streamlit view. Keep it thin: load state, call poll.core, render."""
 
+import re
+
 import pandas as pd
 import streamlit as st
 
@@ -7,6 +9,12 @@ from poll import store
 from poll.core import create_poll, percentages, standings, tally, total_votes, vote
 
 MARKS = {"leader": "🏆", "draw": "🤝", "loser": "👎", "unvoted": "not voted yet", None: ""}
+
+
+def escape_markdown(text: str) -> str:
+    """Backslash-escape Markdown characters so user text is shown as typed."""
+    return re.sub(r"([\\`*_{}\[\]()#+\-.!|<>~])", r"\\\1", text)
+
 
 st.set_page_config(page_title="Live Poll", page_icon="🗳️")
 st.title("🗳️ Live Poll")
@@ -41,7 +49,7 @@ st.bar_chart(results)
 
 rows = zip(tally(poll), percentages(poll), standings(poll), strict=True)
 for (option, votes), (_, share), (_, standing) in rows:
-    st.markdown(f"{option} — {votes} votes ({share}%) {MARKS[standing]}".rstrip())
+    st.markdown(f"{escape_markdown(option)} — {votes} votes ({share}%) {MARKS[standing]}".rstrip())
 
 total = total_votes(poll)
 st.caption(f"{total} votes so far" if total else "No votes yet — be the first!")

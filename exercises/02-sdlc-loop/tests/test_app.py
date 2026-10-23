@@ -96,3 +96,13 @@ def test_results_list_follows_creation_order():
     lines = create_and_vote(["Pizza", "Sushi", "Salad"], ["Salad"])
 
     assert [line.split(" — ")[0] for line in lines] == ["Pizza", "Sushi", "Salad"]
+
+
+def test_option_names_are_shown_literally_not_as_markdown():
+    lines = create_and_vote(["*Pizza*", "# Sushi", "![x](http://example.test/p.png)"], ["*Pizza*"])
+
+    assert lines == [
+        r"\*Pizza\* — 1 votes (100%) 🏆",
+        r"\# Sushi — 0 votes (0%) not voted yet",
+        r"\!\[x\]\(http://example\.test/p\.png\) — 0 votes (0%) not voted yet",
+    ]
